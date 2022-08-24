@@ -118,8 +118,8 @@ static void *cm_create (obs_data_t *settings, obs_source_t *source) {
 static void cm_destroy (void *data) {
 	struct counter *counter = (struct counter *) data;
 
-	gs_image_file4_free (&counter->img[0]);
-	gs_image_file4_free (&counter->img[1]);
+	gs_image_file3_free (&counter->img[0]);
+	gs_image_file3_free (&counter->img[1]);
 }
 
 static uint32_t cm_get_width (void *data) {
@@ -170,7 +170,7 @@ static void cm_update (void *data, obs_data_t *settings) {
 	counter->height = counter->img[0].image2.image.cy + counter->img[1].image2.image.cy;
 }
 static void cm_video_tick (void *data, float seconds) {
-	UNUSED_PARAMETERS (seconds);
+	UNUSED_PARAMETER (seconds);
 
 	struct counter *counter = (struct counter *) data;
 

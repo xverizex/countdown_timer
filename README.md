@@ -15,5 +15,5 @@ mkdir build
 cd build
 cmake ..
 make
-sudo cp src/libcountdown_binary.so /usr/lib64/obs-plugins/
+sudo cp obs-plugin-counterdown-timer.so /usr/lib64/obs-plugins/
 ```
