@@ -1,3 +1,20 @@
+/*
+obs-plugin-countdown-timer
+Copyright (C) <2022> <Dmitrii Naidolinskii> <horisontdawn@yandex.ru>
+
+This program is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 2 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License along
+with this program. If not, see <https://www.gnu.org/licenses/>
+*/
 #include <obs/obs.h>
 #include <obs/obs-module.h>
 #include <obs/graphics/image-file.h>
@@ -85,6 +102,7 @@ bool obs_module_load () {
 }
 
 static void cm_show (void *data) {
+	UNUSED_PARAMETER (data);
 }
 
 static void *cm_create (obs_data_t *settings, obs_source_t *source) {
@@ -101,6 +119,7 @@ static void *cm_create (obs_data_t *settings, obs_source_t *source) {
 	return counter;
 }
 static void cm_destroy (void *data) {
+	struct counter *counter = (struct counter *) data;
 }
 
 static uint32_t cm_get_width (void *data) {
@@ -112,6 +131,7 @@ static uint32_t cm_get_height (void *data) {
 	return counter->height;
 }
 static void cm_get_defaults (obs_data_t *settings) {
+	UNUSED_PARAMETER (settings);
 }
 
 static obs_properties_t *cm_props (void *data) {
@@ -144,11 +164,14 @@ static void cm_update (void *data, obs_data_t *settings) {
 	gs_image_file3_init (&counter->img[1], bit_1, GS_IMAGE_ALPHA_PREMULTIPLY);
 	gs_image_file3_init_texture (&counter->img[0]);
 	gs_image_file3_init_texture (&counter->img[1]);
+	obs_leave_graphics ();
+
 	counter->width = counter->img[0].image2.image.cx * 8;
 	counter->height = counter->img[0].image2.image.cy + counter->img[1].image2.image.cy;
-	obs_leave_graphics ();
 }
 static void cm_video_tick (void *data, float seconds) {
+	UNUSED_PARAMETERS (seconds);
+
 	struct counter *counter = (struct counter *) data;
 
 	struct timeval tv;
