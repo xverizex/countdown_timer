@@ -162,7 +162,7 @@ static void cm_video_tick (void *data, float seconds) {
 
 	counter->cur_time += diff;
 
-	if (counter->cur_time >= 500) {
+	if (counter->cur_time >= 1000) {
 		counter->cur_time = 0L;
 		counter->sec--;
 		if (counter->sec < 0) {
@@ -182,7 +182,7 @@ static void cm_video_render (void *data, gs_effect_t *effect) {
 
 	gs_matrix_push ();
 	gs_matrix_push ();
-	int pos = 1 << 8;
+	int pos = 1 << 7;
 	for (int i = 0; i < 8; i++) {
 		int index = counter->min & pos ? 1 : 0;
 		gs_effect_set_texture (param, counter->img[index].image2.image.texture);
@@ -198,7 +198,7 @@ static void cm_video_render (void *data, gs_effect_t *effect) {
 	gs_matrix_translate3f (0.f, counter->img[0].image2.image.cy, 0.f);
 
 	gs_matrix_push ();
-	pos = 1 << 8;
+	pos = 1 << 7;
 	for (int i = 0; i < 8; i++) {
 		int index = counter->sec & pos ? 1 : 0;
 		gs_effect_set_texture (param, counter->img[index].image2.image.texture);
