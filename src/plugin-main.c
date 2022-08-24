@@ -190,7 +190,8 @@ static void cm_video_tick (void *data, float seconds) {
 		counter->sec--;
 		if (counter->sec < 0) {
 			counter->min--;
-			counter->sec = 59;
+			if (counter->min >= 0) counter->sec = 59;
+			else counter->sec = 0;
 			if (counter->min < 0) counter->min = 0;
 		}
 	}
