@@ -1,1 +1,0 @@
-/usr/bin/cc -fPIC -O2 -g -DNDEBUG -shared  -o obs-plugin-counterdown-timer.so "CMakeFiles/obs-plugin-counterdown-timer.dir/src/plugin-main.c.o"  -Wl,-rpath,/usr/local/lib64: /usr/local/lib64/libobs.so.28 

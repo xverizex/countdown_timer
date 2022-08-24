@@ -27,10 +27,7 @@ struct counter {
 	int width;
 	int height;
 
-	gs_texture_t *bit[2];
-
 	pthread_mutex_t lock;
-	uint8_t *data[2];
 
 	gs_image_file3_t img[2];
 
@@ -120,6 +117,9 @@ static void *cm_create (obs_data_t *settings, obs_source_t *source) {
 }
 static void cm_destroy (void *data) {
 	struct counter *counter = (struct counter *) data;
+
+	gs_image_file4_free (&counter->img[0]);
+	gs_image_file4_free (&counter->img[1]);
 }
 
 static uint32_t cm_get_width (void *data) {

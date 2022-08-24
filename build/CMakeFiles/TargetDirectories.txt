@@ -1,9 +1,0 @@
-/home/cf/coding/dev/obs-plugin-countdown-binary/build/CMakeFiles/obs-plugin-counterdown-timer.dir
-/home/cf/coding/dev/obs-plugin-countdown-binary/build/CMakeFiles/package.dir
-/home/cf/coding/dev/obs-plugin-countdown-binary/build/CMakeFiles/package_source.dir
-/home/cf/coding/dev/obs-plugin-countdown-binary/build/CMakeFiles/edit_cache.dir
-/home/cf/coding/dev/obs-plugin-countdown-binary/build/CMakeFiles/rebuild_cache.dir
-/home/cf/coding/dev/obs-plugin-countdown-binary/build/CMakeFiles/list_install_components.dir
-/home/cf/coding/dev/obs-plugin-countdown-binary/build/CMakeFiles/install.dir
-/home/cf/coding/dev/obs-plugin-countdown-binary/build/CMakeFiles/install/local.dir
-/home/cf/coding/dev/obs-plugin-countdown-binary/build/CMakeFiles/install/strip.dir
