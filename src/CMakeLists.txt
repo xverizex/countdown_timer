@@ -2,7 +2,7 @@ include (FindPkgConfig)
 
 pkg_check_modules (OBS "libobs")
 
-add_library (countdown_binary SHARED
+add_library (countdown_binary MODULE
 	cb.c
 	)
 

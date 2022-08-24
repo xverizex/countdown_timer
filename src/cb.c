@@ -4,7 +4,7 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <pthread.h>
-#include "log.h"
+#include <sys/time.h>
 
 struct counter {
 	int width;
@@ -15,12 +15,25 @@ struct counter {
 	pthread_mutex_t lock;
 	uint8_t *data[2];
 
-	gs_image_file_t img;
+	gs_image_file3_t img[2];
+
+	obs_source_t *source;
+	obs_properties_t *props;
+
+	uint8_t bm[8];
+	uint8_t bs[8];
+
+	uint64_t last_time;
+	uint64_t cur_time;
+
+	int8_t min;
+	int8_t sec;
 };
+
+OBS_DECLARE_MODULE ()
 
 OBS_MODULE_AUTHOR ("xverizex")
 
-OBS_DECLARE_MODULE ()
 
 static const char *cm_get_name (void *data);
 static void *cm_create (obs_data_t *settings, obs_source_t *source);
@@ -37,7 +50,7 @@ static void cm_show (void *data);
 static struct obs_source_info sinfo = {
 	.id = "countdown_binary",
 	.type = OBS_SOURCE_TYPE_INPUT,
-	.output_flags = OBS_SOURCE_VIDEO | OBS_SOURCE_SRGB,
+	.output_flags = OBS_SOURCE_VIDEO,
 	.get_name = cm_get_name,
 	.create = cm_create,
 	.destroy = cm_destroy,
@@ -76,34 +89,15 @@ static void cm_show (void *data) {
 
 static void *cm_create (obs_data_t *settings, obs_source_t *source) {
 	struct counter *counter = calloc (1, sizeof (struct counter));
+	counter->source = source;
 
 	pthread_mutex_init (&counter->lock, NULL);
 
 	counter->width = 32;
 	counter->height = 32;
 
-	counter->data[0] = &bit_0[0];
-	counter->data[1] = &bit_1[0];
+	cm_update (counter, settings);
 
-#if 0
-	obs_enter_graphics ();
-	gs_image_file_init (&counter->img, "/home/cf/Pictures/binary_timer/countdown_1.png");
-	gs_image_file_init_texture (&counter->img);
-	obs_leave_graphics ();
-#endif
-#if 0
-	obs_enter_graphics ();
-	pthread_mutex_lock (&counter->lock);
-	counter->bit[0] = gs_texture_create (32, 32, GS_RGBA, 1, (const uint8_t **) &counter->data[0], GS_RENDER_TARGET);
-	counter->bit[1] = gs_texture_create (32, 32, GS_RGBA, 1, (const uint8_t **) &counter->data[1], GS_RENDER_TARGET);
-	pthread_mutex_unlock (&counter->lock);
-	obs_leave_graphics ();
-#endif
-	obs_enter_graphics ();
-	counter->bit[0] = gs_texture_create_from_file ("/home/cf/Pictures/binary_timer/countdown_1.png");
-	counter->bit[1] = gs_texture_create_from_file ("/home/cf/Pictures/binary_timer/countdown_2.png");
-
-	obs_leave_graphics ();
 	return counter;
 }
 static void cm_destroy (void *data) {
@@ -121,7 +115,7 @@ static void cm_get_defaults (obs_data_t *settings) {
 }
 
 static obs_properties_t *cm_props (void *data) {
-	UNUSED_PARAMETER (data);
+	struct counter *counter = (struct counter *) data;
 
 	obs_properties_t *props = obs_properties_create ();
 	obs_property_t *prop;
@@ -130,51 +124,92 @@ static obs_properties_t *cm_props (void *data) {
 	obs_property_int_set_suffix (prop, " minutes");
 	prop = obs_properties_add_int (props, "seconds", "Seconds", 1, 60, 10);
 	obs_property_int_set_suffix (prop, " seconds");
+	prop = obs_properties_add_path (props, "bit_0", "bit_0", OBS_PATH_FILE, "*.*", "");
+	prop = obs_properties_add_path (props, "bit_1", "bit_1", OBS_PATH_FILE, "*.*", "");
+
+	counter->props = props;
 
 	return props;
 }
 static void cm_update (void *data, obs_data_t *settings) {
 	struct counter *counter = (struct counter *) data;
-#if 0
+
+	const char *bit_0 = obs_data_get_string (settings, "bit_0");
+	const char *bit_1 = obs_data_get_string (settings, "bit_1");
+	counter->min = obs_data_get_int (settings, "minutes");
+	counter->sec = obs_data_get_int (settings, "seconds");
+
 	obs_enter_graphics ();
-	pthread_mutex_lock (&counter->lock);
-	pthread_mutex_unlock (&counter->lock);
+	gs_image_file3_init (&counter->img[0], bit_0, GS_IMAGE_ALPHA_PREMULTIPLY);
+	gs_image_file3_init (&counter->img[1], bit_1, GS_IMAGE_ALPHA_PREMULTIPLY);
+	gs_image_file3_init_texture (&counter->img[0]);
+	gs_image_file3_init_texture (&counter->img[1]);
+	counter->width = counter->img[0].image2.image.cx * 8;
+	counter->height = counter->img[0].image2.image.cy + counter->img[1].image2.image.cy;
 	obs_leave_graphics ();
-#endif
 }
 static void cm_video_tick (void *data, float seconds) {
 	struct counter *counter = (struct counter *) data;
 
-#if 0
-	obs_enter_graphics ();
-	pthread_mutex_lock (&counter->lock);
+	struct timeval tv;
+	gettimeofday (&tv, NULL);
 
-	pthread_mutex_unlock (&counter->lock);
-	obs_leave_graphics ();
-#endif
+	uint64_t cur_time = (tv.tv_sec * 1000) + (tv.tv_usec / 1000);
+
+	if (counter->last_time == 0L) counter->last_time = cur_time;
+
+	uint64_t diff = cur_time - counter->last_time;
+
+	counter->cur_time += diff;
+
+	if (counter->cur_time >= 500) {
+		counter->cur_time = 0L;
+		counter->sec--;
+		if (counter->sec < 0) {
+			counter->min--;
+			counter->sec = 0;
+			if (counter->min < 0) counter->min = 0;
+		}
+	}
+
+	counter->last_time = cur_time;
+
 }
 static void cm_video_render (void *data, gs_effect_t *effect) {
 	struct counter *counter = (struct counter *) data;
 
-	obs_enter_graphics ();
-	pthread_mutex_lock (&counter->lock);
+	gs_eparam_t *const param = gs_effect_get_param_by_name (effect, "image");
 
+	gs_matrix_push ();
+	gs_matrix_push ();
+	int pos = 1 << 8;
+	for (int i = 0; i < 8; i++) {
+		int index = counter->min & pos ? 1 : 0;
+		gs_effect_set_texture (param, counter->img[index].image2.image.texture);
+		gs_draw_sprite (counter->img[index].image2.image.texture, 0, 
+				counter->img[index].image2.image.cx,
+				counter->img[index].image2.image.cy
+				);
+		gs_matrix_translate3f (counter->img[index].image2.image.cx, 0.f, 0.f);
+		pos >>= 1;
+	}
+	gs_matrix_pop ();
 
-#if 1
-	gs_enable_framebuffer_srgb (true);
-	gs_blend_state_push();
-	gs_blend_function(GS_BLEND_ONE, GS_BLEND_INVSRCALPHA);
-#endif
+	gs_matrix_translate3f (0.f, counter->img[0].image2.image.cy, 0.f);
 
-	gs_draw_sprite (counter->bit[0], 0, 32, 32);
-	//gs_draw_sprite (counter->img.texture, 0, counter->img.cx, counter->img.cy);
+	gs_matrix_push ();
+	pos = 1 << 8;
+	for (int i = 0; i < 8; i++) {
+		int index = counter->sec & pos ? 1 : 0;
+		gs_effect_set_texture (param, counter->img[index].image2.image.texture);
+		gs_draw_sprite (counter->img[index].image2.image.texture, 0, 
+				counter->img[index].image2.image.cx,
+				counter->img[index].image2.image.cy
+				);
+		gs_matrix_translate3f (counter->img[index].image2.image.cx, 0.f, 0.f);
+		pos >>= 1;
+	}
+	gs_matrix_pop ();
 
-
-#if 1
-	gs_blend_state_pop();
-#endif
-	gs_enable_framebuffer_srgb (false);
-
-	pthread_mutex_unlock (&counter->lock);
-	obs_leave_graphics ();
+	gs_matrix_pop ();
 }
