@@ -11,7 +11,7 @@ set(PLUGIN_AUTHOR "Dmitrii Naidolinskii")
 
 # Replace `com.example.obs-plugin-template` with a unique Bundle ID for macOS releases (used both in
 # the installer and when submitting the installer for notarization)
-set(MACOS_BUNDLEID "com.example.${CMAKE_PROJECT_NAME}")
+set(MACOS_BUNDLEID "org.xverizex.${CMAKE_PROJECT_NAME}")
 
 # Replace `me@contoso.com` with the maintainer email address you want to put in Linux packages
 set(LINUX_MAINTAINER_EMAIL "horisontdawn@yandex.ru")
@@ -21,7 +21,7 @@ set(LINUX_MAINTAINER_EMAIL "horisontdawn@yandex.ru")
 target_sources(${CMAKE_PROJECT_NAME} PRIVATE src/plugin-main.c)
 
 # Import libobs as main plugin dependency
-find_package(libobs REQUIRED)
+find_package(LibObs REQUIRED)
 include(cmake/ObsPluginHelpers.cmake)
 
 # Uncomment these lines if you want to use the OBS Frontend API in your plugin
@@ -47,7 +47,7 @@ target_sources(${CMAKE_PROJECT_NAME} PRIVATE src/plugin-macros.generated.h)
 
 target_include_directories(${CMAKE_PROJECT_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/src)
 
-target_link_libraries(${CMAKE_PROJECT_NAME} PRIVATE OBS::libobs)
+target_link_libraries(${CMAKE_PROJECT_NAME} PRIVATE libobs)
 
 # --- End of section ---
 
