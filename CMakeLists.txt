@@ -21,7 +21,7 @@ set(LINUX_MAINTAINER_EMAIL "horisontdawn@yandex.ru")
 target_sources(${CMAKE_PROJECT_NAME} PRIVATE src/plugin-main.c)
 
 # Import libobs as main plugin dependency
-find_package(LibObs REQUIRED)
+find_package(libobs REQUIRED)
 include(cmake/ObsPluginHelpers.cmake)
 
 # Uncomment these lines if you want to use the OBS Frontend API in your plugin
@@ -47,7 +47,7 @@ target_sources(${CMAKE_PROJECT_NAME} PRIVATE src/plugin-macros.generated.h)
 
 target_include_directories(${CMAKE_PROJECT_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/src)
 
-target_link_libraries(${CMAKE_PROJECT_NAME} PRIVATE libobs)
+target_link_libraries(${CMAKE_PROJECT_NAME} PRIVATE obs)
 
 # --- End of section ---
 
